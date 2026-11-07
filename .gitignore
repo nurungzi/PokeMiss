@@ -3,8 +3,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
-venv/
-env/
+/venv/
+/env/
 
 # --- Jupyter ---
 .ipynb_checkpoints/
@@ -28,7 +28,8 @@ runs/
 tensorboard/
 wandb/
 
-# --- Showdown 서버 (저장소 밖에 두지만 혹시 몰라서) ---
+# --- Showdown 서버 (로컬 실행용, 저장소에 올리지 않음) ---
+showdown/
 pokemon-showdown/
 node_modules/
 
