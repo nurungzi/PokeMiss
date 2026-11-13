@@ -19,14 +19,31 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "src" / "env")]
 
+from poke_env.battle import Move  # noqa: E402
 from poke_env.player import MaxBasePowerPlayer, RandomPlayer, SimpleHeuristicsPlayer  # noqa: E402
+from poke_env.player.battle_order import SingleBattleOrder  # noqa: E402
 
 from agents.heuristic import HeuristicPlayer  # noqa: E402
 from teams import TEAM_A, TEAM_B  # noqa: E402
 
 FORMAT = "gen9championsbssregmc"
-OPPONENTS = {"random": RandomPlayer, "maxbp": MaxBasePowerPlayer, "simple": SimpleHeuristicsPlayer}
-LABELS = {"random": "랜덤 봇", "maxbp": "최고 위력 봇", "simple": "poke-env 기본 휴리스틱 봇"}
+
+
+def with_mega(cls):
+    """poke-env 기본 봇은 메가진화를 하지 않으므로, 공정 비교용으로 항상 메가진화하게 만든다."""
+    class MegaVersion(cls):
+        def choose_move(self, battle):
+            order = super().choose_move(battle)
+            if isinstance(order, SingleBattleOrder) and isinstance(order.order, Move) and battle.can_mega_evolve:
+                order.mega = True
+            return order
+    MegaVersion.__name__ = cls.__name__ + "Mega"
+    return MegaVersion
+
+
+OPPONENTS = {"random": RandomPlayer, "maxbp": with_mega(MaxBasePowerPlayer),
+             "simple": with_mega(SimpleHeuristicsPlayer)}
+LABELS = {"random": "랜덤 봇", "maxbp": "최고 위력 봇(메가 사용)", "simple": "poke-env 기본 휴리스틱 봇(메가 사용)"}
 
 
 def wilson(wins: int, n: int, z: float = 1.96) -> tuple[float, float]:

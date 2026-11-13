@@ -27,9 +27,19 @@ _UNKNOWN_ITEMS = {"", "unknownitem", "unknown_item", None}
 
 
 def species_id(pokemon, data: ChampionsData) -> str:
-    """poke-env 종 ID를 챔피언스 데이터 ID로 맞춘다. 없으면 기본 종으로 대체."""
+    """poke-env 종 ID를 챔피언스 데이터 ID로 맞춘다. 없으면 기본 종으로 대체.
+
+    주의: poke-env는 상대가 메가진화해도 species를 기본 종으로 남겨 두고 종족값만 바꾼다.
+    그래서 종족값을 비교해 메가 폼을 찾아낸다.
+    """
     sid = to_id(pokemon.species)
     if sid in data.species:
+        bs = getattr(pokemon, "base_stats", None)
+        if bs and dict(bs) != data.species[sid]["baseStats"]:
+            name = data.species[sid]["name"]
+            for fid, f in data.species.items():
+                if f["baseSpecies"] == name and f["isMega"] and f["baseStats"] == dict(bs):
+                    return fid
         return sid
     base = to_id(getattr(pokemon, "base_species", "") or "")
     if base in data.species:

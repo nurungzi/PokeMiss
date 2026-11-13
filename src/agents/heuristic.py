@@ -155,6 +155,12 @@ class HeuristicBrain:
                 score += 0.02 * acc                        # 동점이면 명중률 높은 기술
                 if move["priority"] > 0 and ko > 0.5:
                     score += 5                             # 마무리는 선공기로
+                if "charge" in move.get("flags", []):     # 모으는 턴이 필요한 기술 (날씨로 바로 쓰는 경우 제외)
+                    w = (fld_opp.weather or "").lower()
+                    instant = (mid == "electroshot" and w in {"rain", "raindance", "primordialsea"}) or \
+                              (mid in {"solarbeam", "solarblade"} and w in {"sun", "sunnyday", "desolateland"})
+                    if not instant and me.item_id != "powerherb":
+                        score *= 0.5
                 if mid in SELF_DROP_MOVES and ko < 0.9:
                     score -= 8
                 if move.get("recoil") or mid in {"flareblitz", "bravebird", "doubleedge", "wildcharge", "headsmash"}:
