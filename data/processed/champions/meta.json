@@ -1,0 +1,18 @@
+{
+ "format": "[Gen 9 Champions] BSS Reg M-C",
+ "formatId": "gen9championsbssregmc",
+ "mod": "champions",
+ "exportedAt": "2026-11-13T12:04:40.360Z",
+ "counts": {
+  "species": 358,
+  "legalSpecies": 358,
+  "moves": 515,
+  "items": 166,
+  "abilities": 317
+ },
+ "notes": [
+  "species.legal: 해당 포맷 규칙(Flat Rules 등)에서 사용할 수 있는지",
+  "typechart[공격 타입][방어 타입] = 배율",
+  "챔피언스 능력치: HP = 종족값 + 포인트 + 75, 그 외 = (종족값 + 포인트 + 20) x 성격 보정 (레벨 50)"
+ ]
+}
