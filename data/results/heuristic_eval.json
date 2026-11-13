@@ -1,0 +1,36 @@
+{
+ "format": "gen9championsbssregmc",
+ "date": "2026-11-13T21:38:59",
+ "results": [
+  {
+   "opponent": "random",
+   "battles": 100,
+   "wins": 98,
+   "win_rate": 0.98,
+   "ci95": [
+    0.93,
+    0.994
+   ]
+  },
+  {
+   "opponent": "maxbp",
+   "battles": 100,
+   "wins": 96,
+   "win_rate": 0.96,
+   "ci95": [
+    0.902,
+    0.984
+   ]
+  },
+  {
+   "opponent": "simple",
+   "battles": 100,
+   "wins": 80,
+   "win_rate": 0.8,
+   "ci95": [
+    0.711,
+    0.867
+   ]
+  }
+ ]
+}

@@ -148,6 +148,43 @@ def calc_stats(species: str, sp: Optional[dict] = None, nature: str = "serious",
     return {s: calc_stat(s, base[s], sp.get(s, 0), nature, data) for s in STATS}
 
 
+def infer_spread(species: str, stats: dict, data: Optional[ChampionsData] = None) -> tuple[dict, str]:
+    """실제 능력치에서 능력 포인트와 성격을 거꾸로 추정한다. (메가진화 후 능력치 계산용)
+
+    반환: (sp 딕셔너리, 성격 이름). 정확히 맞는 조합이 없으면 가장 가까운 값을 쓴다.
+    """
+    data = data or default_data()
+    base = data.get_species(species)["baseStats"]
+    sp: dict = {}
+    plus = minus = None
+    for stat in STATS:
+        if stat not in stats or stats[stat] is None:
+            continue
+        target = stats[stat]
+        if stat == "hp":
+            sp["hp"] = max(0, min(32, target - base["hp"] - 75))
+            continue
+        best = None
+        for mult, tag in ((1.0, None), (1.1, "plus"), (0.9, "minus")):
+            for v in range(33):
+                raw = base[stat] + v + 20
+                val = raw if tag is None else ((raw * (110 if tag == "plus" else 90)) % 65536) // 100
+                err = abs(val - target)
+                if best is None or err < best[0]:
+                    best = (err, v, tag)
+        sp[stat] = best[1]
+        if best[2] == "plus":
+            plus = stat
+        elif best[2] == "minus":
+            minus = stat
+    nature = "serious"
+    for nid, n in data.natures.items():
+        if n.get("plus") == plus and n.get("minus") == minus and plus and minus:
+            nature = nid
+            break
+    return {k: v for k, v in sp.items() if v}, nature
+
+
 def boosted(stat_value: int, stage: int) -> int:
     """랭크 보정 (-6 ~ +6). +1 = x1.5, -1 = x2/3 (내림)"""
     stage = max(-6, min(6, stage))
@@ -172,12 +209,16 @@ class Mon:
     status: Optional[str] = None                    # brn / par / psn / tox / slp / frz
     hp: Optional[int] = None                        # 현재 HP (None이면 가득)
     fainted_allies: int = 0                         # 대장의패기(Supreme Overlord)용 쓰러진 아군 수
+    stats_override: Optional[dict] = None           # 실제 능력치를 알 때 (내 포켓몬) 직접 지정
     data: Optional[ChampionsData] = field(default=None, repr=False)
 
     def __post_init__(self):
         self.data = self.data or default_data()
         self.species_data = self.data.get_species(self.species)
-        self.stats = calc_stats(self.species, self.sp, self.nature, self.data)
+        if self.stats_override:
+            self.stats = dict(self.stats_override)
+        else:
+            self.stats = calc_stats(self.species, self.sp, self.nature, self.data)
         if self.ability is None:
             self.ability = self.species_data["abilities"][0]
         self.ability_id = to_id(self.ability)
